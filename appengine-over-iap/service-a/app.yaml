@@ -1,0 +1,4 @@
+runtime: go112
+service: service-a
+env_variables:
+  QUEUE_LOCATION: asia-northeast1
