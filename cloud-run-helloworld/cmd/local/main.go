@@ -15,7 +15,6 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 
-	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"contrib.go.opencensus.io/exporter/zipkin"
 )
 
@@ -34,8 +33,7 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%s", port), &ochttp.Handler{
-		Handler:     mux,
-		Propagation: new(propagation.HTTPFormat),
+		Handler: mux,
 	}))
 }
 
