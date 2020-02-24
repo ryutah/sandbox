@@ -1,0 +1,15 @@
+apiVersion: skaffold/v2alpha4
+kind: Config
+metadata:
+  name: local
+build:
+  artifacts:
+    - image: helloworld
+      context: ../../
+      docker:
+        dockerfile: cmd/local/Dockerfile
+
+deploy:
+  kubectl:
+    manifests:
+      - k8s.yaml

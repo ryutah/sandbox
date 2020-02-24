@@ -134,3 +134,36 @@ Percentage of the requests served within a certain time (ms)
   99%   1226
  100%   1869 (longest request)
 ```
+
+## Local Server
+
+Run local server with [skaffold](https://github.com/GoogleContainerTools/skaffold).
+
+```console
+script/serve.sh
+```
+
+It can belows
+
+1. see tracing with zipkin
+    - Open `localhost:9411`
+1. see profiling with `go tool pprof`
+    - Open CPU Profiler
+
+        ```console
+        go tool pprof -http=":8081" http://localhost:6060/debug/pprof/profile
+        ```
+
+    - Open Heap Profiler
+
+        ```console
+        go tool pprof -http=":8081" http://localhost:6060/debug/pprof/heap
+        ```
+
+### Tips
+
+#### Cleanup images after shutdown local server
+
+```console
+docker image rm $(docker image ls --filter 'dangling=true' -q)
+```

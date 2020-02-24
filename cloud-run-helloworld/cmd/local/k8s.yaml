@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-app
+  name: my-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - image: helloworld
+          name: helloworld
+          ports:
+            - containerPort: 8080
+            - containerPort: 6060
+          env:
+            - name: ZIPKIN_HOST
+              value: "http://zipkin:9411"
+          livenessProbe:
+            httpGet:
+              path: /_healthcheck
+              port: 8080
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /_healthcheck
+              port: 8080
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: 10Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 100m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: my-app
+  name: my-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: my-app
+  ports:
+    - name: app-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: pprof-port
+      protocol: TCP
+      port: 6060
+      targetPort: 6060
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zipkin
+  name: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      containers:
+        - image: openzipkin/zipkin:2.19
+          name: zipkin
+          ports:
+            - containerPort: 9411
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: zipkin
+  name: zipkin
+spec:
+  type: LoadBalancer
+  selector:
+    app: zipkin
+  ports:
+    - name: zipkin-port
+      protocol: TCP
+      port: 9411
+      targetPort: 9411

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	helloworld "github.com/ryutah/sandbox/cloud-run-helloworld"
 
 	"cloud.google.com/go/profiler"
 
@@ -17,28 +18,23 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 )
 
-var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
-
 func main() {
 	initTracing()
 	initProfiler()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-
 	log.Fatalln(http.ListenAndServe(fmt.Sprintf(":%s", port), &ochttp.Handler{
-		Handler:     mux,
+		Handler:     helloworld.NewServeMux(traceID),
 		Propagation: new(propagation.HTTPFormat),
 	}))
 }
 
 func initTracing() {
 	exporter, err := stackdriver.NewExporter(stackdriver.Options{
-		ProjectID:    projectID,
+		ProjectID:    helloworld.Configuration().ProjectID,
 		MetricPrefix: "cloud-run-started",
 		OnError: func(err error) {
 			log.Printf("failed to export trace: %v", err)
@@ -59,17 +55,6 @@ func initProfiler() {
 	}); err != nil {
 		panic(err)
 	}
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	logger := log.New(os.Stdout, "", 0)
-	entry, _ := json.Marshal(map[string]string{
-		"message":                      "called!!",
-		"severity":                     "INFO",
-		"logging.googleapis.com/trace": fmt.Sprintf("projects/%s/traces/%s", projectID, traceID(r)),
-	})
-	logger.Println(string(entry))
-	w.Write([]byte("ok!"))
 }
 
 func traceID(r *http.Request) string {

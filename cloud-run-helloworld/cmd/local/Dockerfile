@@ -2,7 +2,7 @@ FROM golang:1.13-alpine as builder
 RUN apk add --no-cache git
 COPY ./ /root/app
 WORKDIR /root/app
-RUN go build -o app ./cmd/cloudrun
+RUN go build -o app ./cmd/local
 
 FROM alpine:3.10
 RUN apk add --no-cache ca-certificates
