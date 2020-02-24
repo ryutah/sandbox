@@ -5,3 +5,4 @@ metadata:
   annotations:
     kubernetes.io/ingress.global-static-ip-name: example-cluster-ig
     networking.gke.io/managed-certificates: ssl-sample-certificate
+    kubernetes.io/ingress.allow-http: "false"
