@@ -1,4 +1,4 @@
-# ../cloud-run-helloworld
+# cloud-run-helloworld
 
 ## Performance
 
