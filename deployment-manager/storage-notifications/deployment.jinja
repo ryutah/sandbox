@@ -1,0 +1,33 @@
+{% set PROJECT_ID = env["project"] %}
+{% set DEPLOYMENT = env["deployment"] %}
+
+resources:
+  - name:  {{ PROJECT_ID }}-{{ DEPLOYMENT }}-bucket
+    type: storage.v1.bucket
+    properties:
+      location: {{ properties["gcsRegion"] }}
+      storageClass: REGIONAL
+  - name: notification-receiver-topic
+    type: pubsub.v1.topic
+    properties:
+      topic: {{ PROJECT_ID }}-{{ DEPLOYMENT }}-notification
+  - name: notification-receiver-topic-set-iam
+    type: gcp-types/pubsub-v1:pubsub.projects.topics.setIamPolicy
+    properties:
+      resource: $(ref.notification-receiver-topic.name)
+      policy:
+        bindings:
+          - role: "roles/pubsub.publisher"
+            members:
+              - "serviceAccount:service-{{ env["project_number"] }}@gs-project-accounts.iam.gserviceaccount.com"
+  - name: mostro-notification-config
+    type: gcp-types/storage-v1:notifications
+    properties:
+      bucket: $(ref.{{ PROJECT_ID }}-{{ DEPLOYMENT }}-bucket.name)
+      topic: $(ref.notification-receiver-topic.name)
+      payload_format: JSON_API_V1
+      event_types:
+        - OBJECT_FINALIZE
+    metadata:
+      dependsOn:
+        - notification-receiver-topic-set-iam

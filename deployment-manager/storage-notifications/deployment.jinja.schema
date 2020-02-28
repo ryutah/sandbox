@@ -1,0 +1,10 @@
+info:
+  title: Cloud Storage Pub/Sub Notification create template.
+  author: ryutah
+  description: Creates Cloud Storage, Cloud Pub/Sub topic and set Pub/Sub Notification.
+
+properties:
+  gcsRegion:
+    type: string
+    description: Cloud Storage Region
+    default: us-central1
