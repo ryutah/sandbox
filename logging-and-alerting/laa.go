@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/pkg/errors"
 )
@@ -16,19 +15,15 @@ type Injection struct {
 	ContextFactory
 }
 
-func Start(i Injection) error {
+func CreateHandler(i Injection) http.Handler {
+	mux := http.NewServeMux()
 	h := &handler{
 		logger:         i.Logger,
 		alerter:        i.Alerter,
 		contextFactory: i.ContextFactory,
 	}
-	http.HandleFunc("/", h.Handle)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	mux.HandleFunc("/", h.Handle)
+	return mux
 }
 
 type Logger interface {
