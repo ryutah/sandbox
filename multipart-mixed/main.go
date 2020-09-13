@@ -48,6 +48,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		respPart, err := resp.CreatePart(textproto.MIMEHeader{
 			"content-type": []string{"application/json"},
+			"content-id":   []string{part.Header.Get("content-id")},
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -64,6 +65,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "failed to close multipart writer", err.Error())
 		return
 	}
-	w.Header().Set("content-type", fmt.Sprintf("multipart/mixed; boundory=%q", resp.Boundary()))
+	w.Header().Set("content-type", fmt.Sprintf("multipart/mixed; boundary=%q", resp.Boundary()))
 	fmt.Fprintln(w, respBody.String())
 }
